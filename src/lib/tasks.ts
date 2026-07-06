@@ -56,3 +56,27 @@ export async function createTask(input: NewTask): Promise<Task> {
   if (error) throw error;
   return data as Task;
 }
+
+/** Team-wide progress: how many tasks are done out of all tasks. */
+export function taskProgress(tasks: Task[]): {
+  done: number;
+  total: number;
+  percent: number;
+} {
+  const total = tasks.length;
+  const done = tasks.filter((t) => t.status === "done").length;
+  const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+  return { done, total, percent };
+}
+
+/** Update a task's status. */
+export async function updateTaskStatus(
+  id: string,
+  status: TaskStatus,
+): Promise<void> {
+  const { error } = await supabase
+    .from("tasks")
+    .update({ status })
+    .eq("id", id);
+  if (error) throw error;
+}

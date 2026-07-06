@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import LogoutButton from "@/components/LogoutButton";
+import { listTasks, taskProgress, type Task } from "@/lib/tasks";
 import styles from "./page.module.css";
-
-// Sample progress data (later provided by the 進捗管理 feature; for preview now).
-const SAMPLE_PROGRESS = { done: 3, total: 10 };
 
 // A one-liner about the "forest" based on how many tasks are done (later wired to 植林).
 function forestMessage(done: number): string {
@@ -32,8 +31,14 @@ export default function Home() {
     { href: "/forest", emoji: "🌱", title: "植林", desc: "進捗が進むほど緑が育ちます。" },
   ];
 
-  const { done, total } = SAMPLE_PROGRESS;
-  const percent = Math.round((done / total) * 100);
+  // Real team-wide progress from the 進捗管理 tasks.
+  const [tasks, setTasks] = useState<Task[]>([]);
+  useEffect(() => {
+    listTasks()
+      .then(setTasks)
+      .catch((err) => console.error(err));
+  }, []);
+  const { done, total, percent } = taskProgress(tasks);
 
   return (
     <main className={styles.main}>
@@ -63,7 +68,7 @@ export default function Home() {
         ))}
       </section>
 
-      {/* Bottom: current progress and forest status (sample data for now). */}
+      {/* Bottom: current progress and forest status (from real task data). */}
       <section className={styles.status}>
         <h2 className={styles.statusTitle}>今日のようす</h2>
         <div className={styles.statusGrid}>
@@ -82,7 +87,7 @@ export default function Home() {
           </div>
         </div>
         <p className={styles.statusNote}>
-          ※ 今は仮の数値です。進捗管理・植林の機能ができると、ここに実際の状況が反映されます。
+          ※ 進捗は「進捗管理」で登録・更新したタスクから自動集計しています。植林の演出は今後実装します。
         </p>
       </section>
     </main>
