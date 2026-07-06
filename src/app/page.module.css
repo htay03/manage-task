@@ -1,0 +1,199 @@
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, sans-serif;
+  color: #1f2937;
+  background: linear-gradient(180deg, #eef7f0 0%, #ffffff 60%);
+}
+
+/* ヘッダー */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 18px;
+  color: #15803d;
+}
+
+.headerLink {
+  color: #15803d;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 1px solid #15803d;
+  border-radius: 8px;
+}
+.headerLink:hover {
+  background: #15803d;
+  color: #fff;
+}
+
+.userArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #374151;
+  font-weight: 600;
+}
+.logoutButton {
+  font: inherit;
+  color: #15803d;
+  background: transparent;
+  border: 1px solid #15803d;
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.logoutButton:hover {
+  background: #15803d;
+  color: #fff;
+}
+
+/* 見出し（ヒーロー） */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 56px 24px 32px;
+  gap: 16px;
+}
+.title {
+  font-size: 40px;
+  font-weight: 800;
+  margin: 0;
+}
+.lead {
+  max-width: 560px;
+  line-height: 1.8;
+  color: #4b5563;
+  margin: 0;
+}
+
+.primaryButton {
+  margin-top: 8px;
+  background: #15803d;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 999px;
+}
+.primaryButton:hover {
+  background: #166534;
+}
+
+/* 各機能への入口カード */
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 8px 24px 64px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+.cardEmoji {
+  font-size: 32px;
+}
+.cardTitle {
+  font-size: 18px;
+  margin: 0;
+}
+.cardText {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* 画面下部：今日のようす（進捗・植林） */
+.status {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 24px 64px;
+}
+.statusTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+.statusGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.statusCard {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 20px;
+}
+.statusLabel {
+  font-size: 13px;
+  color: #15803d;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.statusValue {
+  font-size: 16px;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.6;
+}
+/* 進捗バー */
+.bar {
+  margin-top: 12px;
+  height: 10px;
+  background: #dcfce7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.barFill {
+  height: 100%;
+  background: #15803d;
+  border-radius: 999px;
+}
+.statusNote {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 12px 0 0;
+}
+
+/* 画面が狭いとき（スマホ等）はカードを縦積みに */
+@media (max-width: 640px) {
+  .features {
+    grid-template-columns: 1fr;
+  }
+  .statusGrid {
+    grid-template-columns: 1fr;
+  }
+  .title {
+    font-size: 32px;
+  }
+}
