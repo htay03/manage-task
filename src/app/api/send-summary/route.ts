@@ -10,17 +10,20 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   const supabaseAdmin = getSupabaseAdmin();
 
-  // AuthN: require a logged-in user. The test button sends its access token.
+  // AuthZ: allow either the scheduler's CRON_SECRET or a logged-in user's token.
   const token = (request.headers.get("authorization") ?? "").replace(
     /^Bearer\s+/i,
     "",
   );
-  if (!token) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const cronSecret = process.env.CRON_SECRET;
+  let authorized = false;
+  if (cronSecret && token === cronSecret) {
+    authorized = true; // called by the scheduler
+  } else if (token) {
+    const { data: userData } = await supabaseAdmin.auth.getUser(token);
+    authorized = !!userData.user; // called by a logged-in user (test button)
   }
-  const { data: userData, error: userErr } =
-    await supabaseAdmin.auth.getUser(token);
-  if (userErr || !userData.user) {
+  if (!authorized) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
