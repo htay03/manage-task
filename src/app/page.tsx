@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import LogoutButton from "@/components/LogoutButton";
+import PasskeyRegisterButton from "@/components/PasskeyRegisterButton";
 import { listTasks, taskProgress, type Task } from "@/lib/tasks";
 import styles from "./page.module.css";
 
@@ -55,6 +56,7 @@ export default function Home() {
         <p className={styles.lead}>
           今日も各機能を使ってみましょう。進捗が進むほど、みんなの森が育っていきます。
         </p>
+        <PasskeyRegisterButton />
       </section>
 
       {/* Entries to each feature. The whole card is a link. */}

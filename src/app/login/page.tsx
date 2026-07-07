@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [pkLoading, setPkLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,6 +27,20 @@ export default function LoginPage() {
       return;
     }
     router.replace("/");
+  }
+
+  async function onPasskey() {
+    setPkLoading(true);
+    setError(undefined);
+    try {
+      const { error } = await supabase.auth.signInWithPasskey();
+      if (error) throw error;
+      router.replace("/");
+    } catch (err) {
+      console.error(err);
+      setError("パスキーでのログインに失敗しました。");
+      setPkLoading(false);
+    }
   }
 
   return (
@@ -73,6 +88,22 @@ export default function LoginPage() {
             className="mt-1 rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white transition hover:bg-zinc-700 disabled:opacity-50"
           >
             {loading ? "ログイン中…" : "ログイン"}
+          </button>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 text-xs text-zinc-400">
+            <span className="h-px flex-1 bg-zinc-200" />
+            または
+            <span className="h-px flex-1 bg-zinc-200" />
+          </div>
+
+          <button
+            type="button"
+            onClick={onPasskey}
+            disabled={pkLoading}
+            className="rounded-lg border border-zinc-300 px-4 py-2 font-medium text-zinc-800 transition hover:bg-zinc-100 disabled:opacity-50"
+          >
+            {pkLoading ? "認証中…" : "🔑 パスキーでログイン"}
           </button>
         </form>
 
