@@ -11,6 +11,7 @@ export type Task = {
   parent_id: string | null;
   created_by: string | null;
   created_at: string;
+  completed_at: string | null;
 };
 
 // Japanese labels for each status (DB stores the English id).
@@ -50,6 +51,7 @@ export async function createTask(input: NewTask): Promise<Task> {
       due_date: input.dueDate || null,
       status: input.status,
       parent_id: input.parentId ?? null,
+      completed_at: input.status === "done" ? new Date().toISOString() : null,
     })
     .select()
     .single();
@@ -76,7 +78,10 @@ export async function updateTaskStatus(
 ): Promise<void> {
   const { error } = await supabase
     .from("tasks")
-    .update({ status })
+    .update({
+      status,
+      completed_at: status === "done" ? new Date().toISOString() : null,
+    })
     .eq("id", id);
   if (error) throw error;
 }

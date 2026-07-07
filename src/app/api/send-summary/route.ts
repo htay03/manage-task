@@ -128,7 +128,10 @@ export async function POST(request: Request) {
 
   const jl = nowJst();
   const dateLabel = `${jl.getUTCFullYear()}/${jl.getUTCMonth() + 1}/${jl.getUTCDate()}`;
-  const summary = buildProgressSummary((tasks ?? []) as Task[], dateLabel);
+  const summary = buildProgressSummary((tasks ?? []) as Task[], {
+    dateLabel,
+    lastSentAt: settings?.last_sent_at ?? null,
+  });
 
   try {
     await sendMail({
