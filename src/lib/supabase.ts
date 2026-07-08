@@ -11,4 +11,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  // Opt in to the passkey (WebAuthn) API. Requires passkeys enabled on the
+  // Supabase project too (Auth settings: passkey_enabled + relying party).
+  auth: { experimental: { passkey: true } },
+});
