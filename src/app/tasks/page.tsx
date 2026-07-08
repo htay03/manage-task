@@ -3,22 +3,16 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
+  buildTaskTree,
   createTask,
   listTasks,
   taskProgress,
   updateTaskStatus,
-  STATUS_LABELS,
+  STATUS_META,
   STATUS_ORDER,
   type Task,
   type TaskStatus,
 } from "@/lib/tasks";
-
-// Badge colors per status.
-const STATUS_STYLE: Record<TaskStatus, string> = {
-  todo: "bg-zinc-100 text-zinc-600",
-  in_progress: "bg-blue-100 text-blue-700",
-  done: "bg-green-100 text-green-700",
-};
 
 function formatDue(due: string | null): string {
   return due ? due.replaceAll("-", "/") : "期限なし";
@@ -45,11 +39,11 @@ function TaskRow({
         value={task.status}
         onChange={(e) => onChangeStatus(task.id, e.target.value as TaskStatus)}
         aria-label="状態"
-        className={`shrink-0 cursor-pointer rounded-full border-0 px-2.5 py-1 text-xs font-medium outline-none ${STATUS_STYLE[task.status]}`}
+        className={`shrink-0 cursor-pointer rounded-full border-0 px-2.5 py-1 text-xs font-medium outline-none ${STATUS_META[task.status].badgeClass}`}
       >
         {STATUS_ORDER.map((s) => (
           <option key={s} value={s}>
-            {STATUS_LABELS[s]}
+            {STATUS_META[s].label}
           </option>
         ))}
       </select>
@@ -106,21 +100,27 @@ export default function TasksPage() {
   }
 
   async function handleStatusChange(id: string, next: TaskStatus) {
-    // Optimistic update; roll back if the request fails.
-    const prev = tasks;
+    // Optimistic update. Capture only this task's previous status so a failure
+    // rolls back just this row, without clobbering other concurrent updates.
+    const previous = tasks.find((t) => t.id === id)?.status;
     setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, status: next } : t)));
     try {
       await updateTaskStatus(id, next);
     } catch (err) {
       console.error(err);
-      setTasks(prev);
+      if (previous !== undefined) {
+        setTasks((ts) =>
+          ts.map((t) => (t.id === id ? { ...t, status: previous } : t)),
+        );
+      }
       setError("状態の更新に失敗しました。");
     }
   }
 
   // Only top-level tasks (no parent) can be chosen as a parent — keeps it 2 levels.
-  const topLevel = tasks.filter((t) => !t.parent_id);
-  const childrenOf = (id: string) => tasks.filter((t) => t.parent_id === id);
+  const parentOptions = tasks.filter((t) => !t.parent_id);
+  // 2-level tree; also surfaces orphans/grandchildren as roots so nothing is hidden.
+  const tree = buildTaskTree(tasks);
 
   const progress = taskProgress(tasks);
 
@@ -181,7 +181,7 @@ export default function TasksPage() {
             className="rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
           >
             <option value="">なし（親タスクとして登録）</option>
-            {topLevel.map((t) => (
+            {parentOptions.map((t) => (
               <option key={t.id} value={t.id}>
                 {t.title}
               </option>
@@ -220,7 +220,7 @@ export default function TasksPage() {
             >
               {STATUS_ORDER.map((s) => (
                 <option key={s} value={s}>
-                  {STATUS_LABELS[s]}
+                  {STATUS_META[s].label}
                 </option>
               ))}
             </select>
@@ -252,8 +252,7 @@ export default function TasksPage() {
           </p>
         ) : (
           <ul className="flex flex-col gap-3">
-            {topLevel.map((parent) => {
-              const children = childrenOf(parent.id);
+            {tree.map(({ task: parent, children }) => {
               return (
                 <li key={parent.id}>
                   <TaskRow task={parent} onChangeStatus={handleStatusChange} />
