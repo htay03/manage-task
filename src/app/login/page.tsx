@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { describePasskeyError, isPasskeySupported } from "@/lib/passkey";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +13,12 @@ export default function LoginPage() {
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [pkLoading, setPkLoading] = useState(false);
+  // Checked in an effect (not during render) to avoid an SSR/hydration mismatch.
+  const [passkeySupported, setPasskeySupported] = useState(false);
+
+  useEffect(() => {
+    setPasskeySupported(isPasskeySupported());
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,7 +45,14 @@ export default function LoginPage() {
       router.replace("/");
     } catch (err) {
       console.error(err);
-      setError("パスキーでのログインに失敗しました。");
+      const { canceled, message } = describePasskeyError(err);
+      // Stay silent if the user simply cancelled the OS dialog.
+      if (!canceled) {
+        setError(
+          message ||
+            "パスキーでのログインに失敗しました。このデバイス/サイトに登録済みのパスキーがない可能性があります。",
+        );
+      }
       setPkLoading(false);
     }
   }
@@ -90,21 +104,25 @@ export default function LoginPage() {
             {loading ? "ログイン中…" : "ログイン"}
           </button>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 text-xs text-zinc-400">
-            <span className="h-px flex-1 bg-zinc-200" />
-            または
-            <span className="h-px flex-1 bg-zinc-200" />
-          </div>
+          {/* Passkey login — only when the browser supports WebAuthn. */}
+          {passkeySupported && (
+            <>
+              <div className="flex items-center gap-3 text-xs text-zinc-400">
+                <span className="h-px flex-1 bg-zinc-200" />
+                または
+                <span className="h-px flex-1 bg-zinc-200" />
+              </div>
 
-          <button
-            type="button"
-            onClick={onPasskey}
-            disabled={pkLoading}
-            className="rounded-lg border border-zinc-300 px-4 py-2 font-medium text-zinc-800 transition hover:bg-zinc-100 disabled:opacity-50"
-          >
-            {pkLoading ? "認証中…" : "🔑 パスキーでログイン"}
-          </button>
+              <button
+                type="button"
+                onClick={onPasskey}
+                disabled={pkLoading}
+                className="rounded-lg border border-zinc-300 px-4 py-2 font-medium text-zinc-800 transition hover:bg-zinc-100 disabled:opacity-50"
+              >
+                {pkLoading ? "認証中…" : "🔑 パスキーでログイン"}
+              </button>
+            </>
+          )}
         </form>
 
         <p className="mt-4 text-center text-sm text-zinc-600">
