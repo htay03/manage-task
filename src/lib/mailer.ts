@@ -27,9 +27,12 @@ export async function sendMail(opts: {
   html: string;
 }): Promise<void> {
   const transport = getTransport();
+  // Put every recipient in BCC (and address the visible "To" to the sender) so
+  // recipients can't see each other's addresses.
   await transport.sendMail({
     from,
-    to: opts.to.join(", "),
+    to: from,
+    bcc: opts.to,
     subject: opts.subject,
     text: opts.text,
     html: opts.html,

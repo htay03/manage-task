@@ -1,20 +1,7 @@
+import { dueDiffDays, jstTodayMs } from "./jst";
 import { STATUS_LABELS, taskProgress, type Task } from "./tasks";
 
 export type Summary = { subject: string; text: string; html: string };
-
-const DAY_MS = 86_400_000;
-
-// Midnight (JST) of today, as a UTC-based Date for day math.
-function jstTodayMs(): number {
-  const j = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  return Date.UTC(j.getUTCFullYear(), j.getUTCMonth(), j.getUTCDate());
-}
-
-// Whole-day difference between a "YYYY-MM-DD" due date and today (JST).
-function dueDiffDays(due: string, todayMs: number): number {
-  const [y, m, d] = due.split("-").map(Number);
-  return Math.round((Date.UTC(y, m - 1, d) - todayMs) / DAY_MS);
-}
 
 function mmdd(due: string): string {
   return due.slice(5).replaceAll("-", "/");

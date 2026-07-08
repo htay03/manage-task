@@ -48,11 +48,21 @@ export async function saveEmailSettings(
     enabled: input.enabled,
   };
 
-  if (id) {
+  // Enforce a single team-wide row (1-5). If no id was given, reuse the existing
+  // row's id instead of blindly inserting, so repeated saves can't create
+  // duplicate settings rows. (A DB-level unique constraint is the stronger fix;
+  // see the review report.)
+  let targetId = id;
+  if (!targetId) {
+    const existing = await getEmailSettings();
+    targetId = existing?.id;
+  }
+
+  if (targetId) {
     const { data, error } = await supabase
       .from("email_settings")
       .update(payload)
-      .eq("id", id)
+      .eq("id", targetId)
       .select()
       .single();
     if (error) throw error;
