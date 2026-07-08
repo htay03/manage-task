@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function SignupPage() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string>();
@@ -18,7 +19,11 @@ export default function SignupPage() {
     setLoading(true);
     setError(undefined);
     setMessage(undefined);
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name: name.trim() } },
+    });
     if (error) {
       setError("登録に失敗しました。入力内容をご確認ください。");
       setLoading(false);
@@ -47,6 +52,21 @@ export default function SignupPage() {
           onSubmit={onSubmit}
           className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-md ring-1 ring-black/5"
         >
+          <label className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-zinc-700">表示名</span>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="例：畠山"
+              required
+              className="rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
+            />
+            <span className="text-xs text-zinc-400">
+              トップ画面の「ようこそ ○○さん」に表示されます
+            </span>
+          </label>
+
           <label className="flex flex-col gap-1">
             <span className="text-sm font-medium text-zinc-700">
               メールアドレス
