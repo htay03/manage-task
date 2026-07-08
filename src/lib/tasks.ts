@@ -49,7 +49,7 @@ export const STATUS_LABELS: Record<TaskStatus, string> = {
 // Columns fetched from the DB. Listing them explicitly (instead of "*") means
 // the client-side Task type and the query never silently diverge.
 const TASK_COLUMNS =
-  "id, title, assignee, due_date, status, parent_id, created_by, created_at";
+  "id, title, assignee, due_date, status, parent_id, created_by, created_at, completed_at";
 
 // Normalize an untyped DB row into a Task. An unexpected status falls back to
 // "todo" so an unknown value can't break status-keyed UI (labels, colors).
@@ -63,6 +63,8 @@ function normalizeTask(row: Record<string, unknown>): Task {
     parent_id: typeof row.parent_id === "string" ? row.parent_id : null,
     created_by: typeof row.created_by === "string" ? row.created_by : null,
     created_at: typeof row.created_at === "string" ? row.created_at : "",
+    completed_at:
+      typeof row.completed_at === "string" ? row.completed_at : null,
   };
 }
 
